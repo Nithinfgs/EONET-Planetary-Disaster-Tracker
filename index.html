@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EONET Planetary Disaster Tracker</title>
+  
+  <!-- Google Fonts for futuristic & clean aesthetic -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+  
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  
+  <!-- FontAwesome for modern icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <!-- App Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- App Container -->
+  <div class="app-container">
+    
+    <!-- Top Dashboard Header -->
+    <header class="app-header">
+      <div class="logo-section">
+        <div class="pulsing-globe-icon"></div>
+        <h1>EONET <span>PLANETARY TRACKER</span></h1>
+        <div class="sync-indicator" id="sync-indicator">
+          <i class="fa-solid fa-arrows-rotate fa-spin"></i> Syncing NASA...
+        </div>
+      </div>
+      
+      <!-- View Toggle (Markers vs. Heatmap) -->
+      <div class="view-toggle-wrapper">
+        <button class="view-toggle-btn active" id="toggle-markers" title="Show individual markers">
+          <i class="fa-solid fa-location-dot"></i> Markers
+        </button>
+        <button class="view-toggle-btn" id="toggle-heatmap" title="Show density heatmap">
+          <i class="fa-solid fa-fire-flame-simple"></i> Heatmap
+        </button>
+      </div>
+      
+      <!-- Stats Dashboard -->
+      <div class="stats-container">
+        <div class="stat-card" id="stat-total">
+          <div class="stat-value">0</div>
+          <div class="stat-label">Active Events</div>
+        </div>
+        <div class="stat-card" id="stat-fires">
+          <div class="stat-value text-fire">0</div>
+          <div class="stat-label">Wildfires</div>
+        </div>
+        <div class="stat-card" id="stat-storms">
+          <div class="stat-value text-storm">0</div>
+          <div class="stat-label">Severe Storms</div>
+        </div>
+        <div class="stat-card" id="stat-volcanoes">
+          <div class="stat-value text-volcano">0</div>
+          <div class="stat-label">Volcanoes</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Dashboard Body -->
+    <main class="dashboard-body">
+      
+      <!-- Left Sidebar: Event List and Controls -->
+      <aside class="sidebar">
+        <!-- Search and Filter Panel -->
+        <div class="control-panel">
+          <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="search-input" placeholder="Search disasters by name...">
+          </div>
+          
+          <div class="filter-group">
+            <label for="category-filter">Category</label>
+            <select id="category-filter">
+              <option value="all">All Categories</option>
+              <option value="wildfires">Wildfires</option>
+              <option value="severeStorms">Severe Storms</option>
+              <option value="volcanoes">Volcanoes</option>
+              <option value="seaLakeIce">Sea & Lake Ice</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="time-filter">Timeframe</label>
+            <select id="time-filter">
+              <option value="30">Past 30 Days</option>
+              <option value="60">Past 60 Days</option>
+              <option value="180">Past 6 Months</option>
+              <option value="365">Past Year</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Event List -->
+        <div class="event-list-container">
+          <div class="event-list-header">
+            <h3>Disaster Feed</h3>
+            <span class="badge" id="list-count">0 items</span>
+          </div>
+          <div class="event-list" id="event-list">
+            <!-- Populated dynamically via JS -->
+            <div class="no-events">No active events found.</div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Center Map Container -->
+      <section class="map-section">
+        <div id="map"></div>
+        
+        <!-- Legend Overlay -->
+        <div class="map-legend">
+          <h4>Legend</h4>
+          <div class="legend-item"><span class="legend-dot fire"></span> Wildfires</div>
+          <div class="legend-item"><span class="legend-dot storm"></span> Severe Storms</div>
+          <div class="legend-item"><span class="legend-dot volcano"></span> Volcanoes</div>
+          <div class="legend-item"><span class="legend-dot ice"></span> Sea & Lake Ice</div>
+        </div>
+      </section>
+
+      <!-- Right Detail Drawer -->
+      <div class="detail-drawer" id="detail-drawer">
+        <button class="close-btn" id="close-drawer-btn">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <div class="drawer-content">
+          <div class="drawer-header">
+            <span class="event-badge" id="drawer-category">Wildfire</span>
+            <h2 id="drawer-title">Event Title Placeholder</h2>
+            <p class="event-date" id="drawer-date"><i class="fa-regular fa-calendar"></i> July 25, 2026</p>
+          </div>
+
+          <div class="drawer-body">
+            <!-- Event Stats -->
+            <div class="drawer-stats">
+              <div class="drawer-stat">
+                <span class="label">Status</span>
+                <span class="value" id="drawer-status">Active</span>
+              </div>
+              <div class="drawer-stat">
+                <span class="label">Coordinates</span>
+                <span class="value" id="drawer-coords">0.0, 0.0</span>
+              </div>
+            </div>
+
+            <!-- NASA GIBS Satellite Imagery Toggler -->
+            <div class="satellite-toggle-container">
+              <div class="sat-text">
+                <h3>NASA GIBS Satellite Layer</h3>
+                <p>Overlay live MODIS corrected reflectance imagery over this location.</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="gibs-toggle">
+                <span class="slider round"></span>
+              </label>
+            </div>
+
+            <!-- Local Coverage & News -->
+            <div class="news-section">
+              <h3>Local Coverage & Reports</h3>
+              <div id="drawer-news">
+                <!-- Dynamically populated news cards -->
+              </div>
+            </div>
+
+            <!-- Chart/Analysis Panel -->
+            <div class="chart-section">
+              <h3 id="chart-title">Historical Severity</h3>
+              <div class="chart-container">
+                <canvas id="details-chart"></canvas>
+              </div>
+            </div>
+
+            <!-- Event Sources -->
+            <div class="sources-section">
+              <h3>Sources & Reports</h3>
+              <ul id="drawer-sources">
+                <!-- Dynamically populated links -->
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Fullscreen Loading Spinner Overlay -->
+  <div class="loading-overlay" id="loading-overlay">
+    <div class="loader-container">
+      <div class="space-spinner"></div>
+      <h2>Retrieving Planetary Telemetry...</h2>
+      <p>Querying NASA EONET Database</p>
+    </div>
+  </div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  
+  <!-- Leaflet Heatmap Plugin -->
+  <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- App Modules -->
+  <script type="module" src="app.js"></script>
+</body>
+</html>
