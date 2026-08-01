@@ -1,10 +1,12 @@
 # EONET Planetary Disaster Tracker
 
+https://silver-youtiao-dcbc70.netlify.app/
+
 A high-performance, dark-themed dashboard tracking active global natural hazards in real-time. Built entirely with vanilla technologies, utilizing NASA’s EONET (Earth Observatory Natural Event Tracker) and GIBS (Global Imagery Browse Services) APIs.
 
 ---
 
-## 🌟 Key Features
+##  Key Features
 
 *   **Real-Time Hazard Mapping**: Plots active wildfires, volcanoes, severe storms, and sea ice drift.
 *   **Dual View Modes**:
@@ -19,7 +21,7 @@ A high-performance, dark-themed dashboard tracking active global natural hazards
 
 ---
 
-## 🛠️ Tech Stack & Architecture
+##  Tech Stack & Architecture
 
 To prevent disk-space bloat and iCloud sync errors (common with large node repositories), this project is built **completely dependency-free** at the local file level. All frameworks and libraries are loaded directly via secure global CDNs.
 
